@@ -21,4 +21,6 @@ from app01 import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('email/', views.send_welcome_email,),
+    path('register/',views.register_views),
+    path('register/confirm/',views.confirm),
 ]

@@ -1,3 +1,4 @@
+from django import forms
 from django.shortcuts import render, HttpResponse
 from django.conf import settings
 # 发邮件
@@ -5,10 +6,26 @@ from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt  # 免除认证
 from django.http import JsonResponse
 
-
 # 导入自己的用户模型
+from app01 import models
 
-# Create your views here.
+# redis
+import redis
+
+
+class RegisterModelForm(forms.ModelForm):
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'input-field', 'placeholder': '确认密码'}))
+
+    class Meta:
+        model = models.UserInfo
+        fields = '__all__'
+
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'input-field', 'placeholder': '用户名'}),
+            'email': forms.TextInput(attrs={'class': 'input-field', 'placeholder': '邮箱', 'id': 'EM'}),
+            'password': forms.PasswordInput(attrs={'class': 'input-field', 'placeholder': '密码'}),
+        }
 
 
 def send_welcome_email(request):
@@ -22,13 +39,15 @@ def send_welcome_email(request):
     return HttpResponse('发送成功')
 
 
-def register_views(request):
-    return render(request, 'register.html')
-
-
 @csrf_exempt
-def confirm(request):
+def confirm_email(request):
     if request.method == "POST":
-        confirm_key = request.POST['confirm_key']
-        print(confirm_key)
+        email = request.POST['email']
+        print(email)
         return JsonResponse({'status': True})
+
+
+def register(request):
+    if request.method == "GET":
+        form = RegisterModelForm()
+        return render(request, 'register.html', {'form': form})

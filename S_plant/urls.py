@@ -14,13 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
-from app01 import views
+# from app01 import views # 路由分发出去了所以不再需要这个
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('email/', views.send_welcome_email,),
-    path('register/',views.register_views),
-    path('register/confirm/',views.confirm),
+    path('app01/', include('app01.urls')),  # 分发路由，以后以qpp01为前缀访问时，都将被分发至app01下的urls.py
+    path('', include('web.urls'))  # 不以app01开头的都将被分发至web下的urls.py
 ]

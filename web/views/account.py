@@ -14,6 +14,14 @@ def register(request):
     if request.method == "GET":
         form = RegisterModelForm()
         return render(request, 'register.html', {'form': form})
+    form = RegisterModelForm(request.POST)
+    if form.is_valid():
+        # 保存至数据库且密码需为密文，可以在模型文件的钩子方法中处理，直接在那里把返回的数据修改
+        print(form.cleaned_data)  # 打印拿到的数据
+        form.save()
+        return JsonResponse({'status': True, 'data': '/login/'})
+    else:
+        return JsonResponse({'status': False, 'error': form.errors})
 
 
 @csrf_exempt
@@ -30,7 +38,7 @@ def send_email(request):
         form = SendEmailForm(data=request.GET)
         if form.is_valid():  # 这一步验证通过后其实就会执行完钩子方法中的所有内容，包括邮件发送
             # 发邮件并且写入Redis
-            return JsonResponse({'status': True,})
+            return JsonResponse({'status': True, })
 
         # form会帮助我们进行校验，所以就可以直接获取错误信息
-        return JsonResponse({'status': False,'error':form.errors})
+        return JsonResponse({'status': False, 'error': form.errors})

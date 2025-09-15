@@ -1,0 +1,46 @@
+{% extends 'layout/basic.html' %}
+
+{% block content %}
+    <div class="container" style="width: 500px">
+        <div class="panel panel-default" style="margin-top: 50px">
+            <div class="panel-body" >
+                <h3 style="text-align: center">登 录</h3>
+                <form action="" novalidate method="post">
+                    {% csrf_token %}
+                    {% for foo in form %}
+                        {% if foo.name == "picture_code" %}
+                            <div class="clearfix row">
+                                <div class="col-xs-8">
+                                    {{ foo.label }}:{{ foo }}
+                                    <span style="color: red;font-size: 13px" class="error-msg">{{ foo.errors.0 }}</span>
+                                </div>
+                                <div class="col-xs-4" style="margin-top: 20px">
+                                    <a href=""><img src="{% url 'image_code' %}" alt="error" id="imageCode" title="点击更换图片"></a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="">
+                                {{ foo.label }}:{{ foo }}
+                                <span style="color: red;font-size: 13px" class="error-msg">{{ foo.errors.0 }}</span>
+                            </div><br>
+                        {% endif %}
+                    {% endfor %}
+                    <input type="submit" value="登 录" class="btn btn-default" style="margin-top: 20px">
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block JS %}
+{#    <script>#}
+{#        $(function () {#}
+{#            $("#imageCode").click(function () {#}
+{#                alert("success")#}
+{#                var oldSrc =  $(this).attr('src');  // 获取原来的地址#}
+{#                $(this).attr('src',oldSrc + "?");#}
+{#            })#}
+{#        })#}
+{#    </script>#}
+{% endblock %}

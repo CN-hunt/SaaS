@@ -24,7 +24,7 @@ class RegisterModelForm(forms.ModelForm):
     """注册界面表单"""
     # 显式定义密码字段并添加长度验证
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'input-field', 'placeholder': '密码'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '密码'}),
         min_length=8,  # 最小长度8位
         max_length=20,  # 最大长度20位
         error_messages={
@@ -33,11 +33,11 @@ class RegisterModelForm(forms.ModelForm):
         }
     )
     confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'input-field', 'placeholder': '确认密码'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '确认密码'})
     )
     code = forms.CharField(label='验证码',
                            widget=forms.TextInput(
-                               attrs={'class': 'input-field', 'placeholder': '请输入验证码', 'name': 'confirm'}))
+                               attrs={'class': 'form-control', 'placeholder': '请输入验证码', 'name': 'confirm'}))
 
     # 以上操作将长度验证直接集成了。但是我们仍然需要写钩子方法验证两个密码是否一致
 
@@ -45,8 +45,8 @@ class RegisterModelForm(forms.ModelForm):
         model = models.UserInfo
         fields = '__all__'
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'input-field', 'placeholder': '用户名'}),
-            'email': forms.TextInput(attrs={'class': 'input-field', 'placeholder': '邮箱'}),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '用户名'}),
+            'email': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '邮箱'}),
             # 注意：此处不再重复定义password的widget，已在上方显式字段中定义
         }
 

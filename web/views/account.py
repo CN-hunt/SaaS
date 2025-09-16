@@ -16,7 +16,7 @@ def register(request):
     """注册"""
     if request.method == "GET":
         form = RegisterModelForm()
-        return render(request, 'register.html', {'form': form})
+        return render(request, 'rgs.html', {'form': form})
     form = RegisterModelForm(request.POST)
     if form.is_valid():
         # 保存至数据库且密码需为密文，可以在模型文件的钩子方法中处理，直接在那里把返回的数据修改

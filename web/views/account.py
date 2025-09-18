@@ -11,6 +11,9 @@ from web.forms.account import RegisterModelForm, SendEmailForm, LoginForm
 
 from django.db.models import Q  # 构造复杂查询
 
+import uuid  # 构造随机数，订单号
+import datetime
+
 
 def register(request):
     """注册"""
@@ -21,7 +24,20 @@ def register(request):
     if form.is_valid():
         # 保存至数据库且密码需为密文，可以在模型文件的钩子方法中处理，直接在那里把返回的数据修改
         print(form.cleaned_data)  # 打印拿到的数据
-        form.save()
+        instance = form.save()   # 将要保存的用户值赋给一个对象用于创建交易记录
+
+        # 创建交易记录,因为每个用户注册默认是有一个免费套餐的，这个套餐可以看做是购买的，只是不需要掏钱
+        price_policy = models.PricePolicy.objects.filter(category=1, title='个人免费版').first()
+        models.Transaction.objects.create(
+            status=2,
+            order=str(uuid.uuid4()),
+            user=instance,
+            price_policy=price_policy,
+            count=0,
+            price=0,
+            start_datetime=datetime.datetime.now(),
+        )
+
         return JsonResponse({'status': True, 'data': '/login/'})
     else:
         return JsonResponse({'status': False, 'error': form.errors})

@@ -123,6 +123,17 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# 白名单，用户无需登录即可访问的url界面
+WHITE_REGEX_URL_LIST = [
+    '/register/',
+    '/send/email/',
+    # 登录
+    '/login/',
+    '/image/code/',
+    # 主页
+    '/index/',
+]
+
 try:
     from .local_settings import *
 except ImportError:

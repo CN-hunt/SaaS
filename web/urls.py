@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from web.views import account,home
+from web.views import account,home,project
 
 from app01 import views
 
@@ -16,4 +16,7 @@ urlpatterns = [
 
     # 主页
     path('index/',home.index,name='index'),
+
+    # 项目管理
+    path('project/list/',project.project_list,name='project_list'),
 ]

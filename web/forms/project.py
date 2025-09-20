@@ -2,6 +2,7 @@ from django import forms
 from web import models
 from web.models import Project
 from django.core.exceptions import ValidationError
+from web.forms.widgets import ColorRadioSelect  # 自己重写的样式
 
 
 class ProjectModelForm(forms.ModelForm):
@@ -11,7 +12,7 @@ class ProjectModelForm(forms.ModelForm):
 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'color': forms.RadioSelect(),
+            'color': ColorRadioSelect(attrs={'class': 'color-radio'}),
             'desc': forms.Textarea(attrs={'class': 'form-control'}),
         }
 

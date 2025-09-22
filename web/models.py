@@ -52,12 +52,12 @@ class Transaction(models.Model):
 class Project(models.Model):
     # 项目表
     COLOR_CHOICES = (
-        (1, '#F0FFFF'),
-        (2, '#FFE4E1'),
-        (3, '#00FFFF'),
-        (4, '#8FBC8F'),
-        (5, '#00FF7F'),
-        (6, '#FFFF00'),
+        (1, '#A7CE4F'),
+        (2, '#E7DA96'),
+        (3, '#9EBAC6'),
+        (4, '#F79A57'),
+        (5, '#EB4A59'),
+        (6, '#5E595A'),
         (7, '#BA55D3'),
     )
     name = models.CharField(verbose_name='项目名', max_length=50)
@@ -79,3 +79,19 @@ class ProjectUser(models.Model):
     start = models.BooleanField(verbose_name='星标', default=False)
 
     create_datetime = models.DateTimeField(verbose_name='加入时间', auto_now_add=True)
+
+
+class Wiki(models.Model):
+    project = models.ForeignKey(verbose_name='项目', to='Project', on_delete=models.CASCADE)
+    title = models.CharField(verbose_name='标题', max_length=50)
+    content = models.TextField(verbose_name='内容')
+
+    # 自关联
+    parent = models.ForeignKey(verbose_name='父文章', to='Wiki', on_delete=models.CASCADE, null=True, blank=True,
+                               related_name='children')
+
+    # 深度
+    depth = models.IntegerField(verbose_name='深度', default=1)
+
+    def __str__(self):
+        return self.title

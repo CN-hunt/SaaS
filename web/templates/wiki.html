@@ -1,5 +1,120 @@
 {% extends 'layout/manage.html' %}
+{% load static %}
+{% block CSS %}
+    <style>
+        .title-list {
+            border-right: 1px solid silver;
+            min-height: 500px;
+        }
+
+        .title-list ul {
+            padding-left: 15px;
+        }
+
+        .title-list ul a{
+            display:block;
+            padding: 5px 0;
+        }
+
+        .panel-default .panel-heading {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .content {
+            border-left: 1px solid silver;
+            min-height: 600px;
+            margin-left: -1px;
+        }
+
+        .panel-body {
+            padding: 0;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
-	<h2>文件</h2>
-{% endblock %}]
+    <div class="container-fluid">
+        <div class="panel panel-default" style="margin-top: 20px">
+            <div class="panel-heading">
+                <div>
+                    <i class="fa fa-file-text-o" aria-hidden="true"></i> wiki文档
+                </div>
+                <div class="function">
+                    <a type="button" class="btn btn-success btn-xs"
+                       href="{% url 'wiki_add' project_id=request.tracer.project.id %}">
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 新建
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="col-sm-3 title-list">
+                    <div>目录</div>
+                    <ul id="catalog">
+
+                        <!--
+                        <li><a href="">文章1</a>
+                            <ul>
+                                <li><a href="">子目录1</a></li>
+                                <li><a href="">子目录2</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="">文章2</a></li>
+                        <li><a href="">文章3</a>
+                            <ul>
+                                <li><a href="">子目录1</a></li>
+                                <li><a href="">子目录2</a></li>
+                            </ul>
+                        </li>
+                        -->
+                    </ul>
+                </div>
+                <div class="col-sm-9 content">
+                    <div style="text-align: center;margin-top: 80px">
+                        <h4>《{{ request.tracer.project.name }}》wiki文档库</h4>
+                        <a href="{% url 'wiki_add' project_id=request.tracer.project.id %}"><i
+                                class="fa fa-plus-circle" aria-hidden="true"></i> 新建文档 </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block JS %}
+    <script src="{% static 'JS/jquery-3.7.1.min.js' %}"></script>
+    <script>
+        $(function () {
+            initCatalog()
+        })
+
+        function initCatalog() {
+            $.ajax({
+                url:"{% url 'wiki_catalog' project_id=request.tracer.project.id %}",
+                type:"GET",
+                dataType:"JSON",
+                success:function (res) {
+                    console.log(res)
+                    if(res.status){
+                        $.each(res.data,function (index,item) {
+                            item.id
+                            item.title
+                            item.parent_id
+                            if(!item.parent_id){
+                                var li=$("<li>").attr('id',"id_"+item.id).append($("<a>").text(item.title)).append($("<ul>"));
+                                $("#catalog").append(li)
+                            }else {
+                                var li=$("<li>").attr('id',"id_"+item.id).append($("<a>").text(item.title)).append($("<ul>"));
+                                $("#id_"+item.parent_id).children('ul').append(li)
+                            }
+                        })
+                    }else {
+
+                        alert('初始化目录失败')
+                    }
+                }
+            })
+        }
+    </script>
+{% endblock %}

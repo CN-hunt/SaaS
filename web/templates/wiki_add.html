@@ -1,0 +1,64 @@
+{% extends 'layout/manage.html' %}
+
+{% block CSS %}
+    <style>
+        .title-list {
+            border-right: 1px solid silver;
+            min-height: 500px;
+        }
+
+        .panel-default .panel-heading {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .content {
+            border-left: 1px solid silver;
+            min-height: 600px;
+            margin-left: -1px;
+        }
+
+        .panel-body {
+            padding: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="panel panel-default" style="margin-top: 20px">
+            <div class="panel-heading">
+                <div>
+                    <i class="fa fa-file-text-o" aria-hidden="true"></i> wiki文档
+                </div>
+                <div class="function">
+                    <a type="button" class="btn btn-success btn-xs"
+                       href="{% url 'wiki_add' project_id=request.tracer.project.id %}">
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 新建
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="col-sm-3 title-list">
+                    <div>目录</div>
+                </div>
+                <div class="col-sm-9 content">
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            <span style="color: red" class="error-mag">{{ field.errors.0 }}</span>
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary">提 交</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}]

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from web.views import account, home, project, manage
+from web.views import account, home, project, manage,wiki
 
 from app01 import views
 
@@ -29,7 +29,11 @@ urlpatterns = [
         path('issues/', manage.issues, name='issues'),
         path('statistics/', manage.statistics, name='statistics'),
         path('file/', manage.file, name='file'),
-        path('wiki/', manage.wiki, name='wiki'),
+
+        path('wiki/', wiki.wiki, name='wiki'),
+        path('wiki/add', wiki.wiki_add, name='wiki_add'),
+        path('wiki/catalog', wiki.wiki_catalog, name='wiki_catalog'),
+
         path('setting/', manage.setting, name='setting'),
     ], )),
 

@@ -5,7 +5,7 @@ from django import forms
 class WikiModelForm(forms.ModelForm):
     class Meta:
         model = models.Wiki
-        exclude = ['project', ]
+        exclude = ['project', 'depth']
 
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),

@@ -11,8 +11,8 @@
             padding-left: 15px;
         }
 
-        .title-list ul a{
-            display:block;
+        .title-list ul a {
+            display: block;
             padding: 5px 0;
         }
 
@@ -46,6 +46,16 @@
                        href="{% url 'wiki_add' project_id=request.tracer.project.id %}">
                         <i class="fa fa-plus-circle" aria-hidden="true"></i> 新建
                     </a>
+                    {% if wiki_object %}
+                        <a type="button" class="btn btn-danger btn-xs"
+                           href="{% url 'wiki_delete' project_id=request.tracer.project.id wiki_id=wiki_object.id %}">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i> 删除
+                        </a>
+                        <a type="button" class="btn btn-primary btn-xs"
+                           href="{% url 'wiki_edit' project_id=request.tracer.project.id wiki_id=wiki_object.id %}">
+                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i> 编辑
+                        </a>
+                    {% endif %}
                 </div>
             </div>
             <div class="panel-body">
@@ -71,11 +81,17 @@
                     </ul>
                 </div>
                 <div class="col-sm-9 content">
-                    <div style="text-align: center;margin-top: 80px">
-                        <h4>《{{ request.tracer.project.name }}》wiki文档库</h4>
-                        <a href="{% url 'wiki_add' project_id=request.tracer.project.id %}"><i
-                                class="fa fa-plus-circle" aria-hidden="true"></i> 新建文档 </a>
-                    </div>
+                    {% if wiki_object %}
+
+                        {{ wiki_object.content }}
+
+                    {% else %}
+                        <div style="text-align: center;margin-top: 80px">
+                            <h4>《{{ request.tracer.project.name }}》wiki文档库</h4>
+                            <a href="{% url 'wiki_add' project_id=request.tracer.project.id %}"><i
+                                    class="fa fa-plus-circle" aria-hidden="true"></i> 新建文档 </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -85,31 +101,31 @@
 {% block JS %}
     <script src="{% static 'JS/jquery-3.7.1.min.js' %}"></script>
     <script>
+        var WIKI_DETAIL_URL = "{% url 'wiki' project_id=request.tracer.project.id %}";
         $(function () {
             initCatalog()
         })
 
         function initCatalog() {
             $.ajax({
-                url:"{% url 'wiki_catalog' project_id=request.tracer.project.id %}",
-                type:"GET",
-                dataType:"JSON",
-                success:function (res) {
+                url: "{% url 'wiki_catalog' project_id=request.tracer.project.id %}",
+                type: "GET",
+                dataType: "JSON",
+                success: function (res) {
                     console.log(res)
-                    if(res.status){
-                        $.each(res.data,function (index,item) {
-                            item.id
-                            item.title
-                            item.parent_id
-                            if(!item.parent_id){
-                                var li=$("<li>").attr('id',"id_"+item.id).append($("<a>").text(item.title)).append($("<ul>"));
+                    if (res.status) {
+                        $.each(res.data, function (index, item) {
+                            var href = WIKI_DETAIL_URL + "?wiki_id=" + item.id
+
+                            if (!item.parent_id) {
+                                var li = $("<li>").attr('id', "id_" + item.id).append($("<a>").text(item.title).attr('href', href)).append($("<ul>"));
                                 $("#catalog").append(li)
-                            }else {
-                                var li=$("<li>").attr('id',"id_"+item.id).append($("<a>").text(item.title)).append($("<ul>"));
-                                $("#id_"+item.parent_id).children('ul').append(li)
+                            } else {
+                                var li = $("<li>").attr('id', "id_" + item.id).append($("<a>").text(item.title).attr('href', href)).append($("<ul>"));
+                                $("#id_" + item.parent_id).children('ul').append(li)
                             }
                         })
-                    }else {
+                    } else {
 
                         alert('初始化目录失败')
                     }

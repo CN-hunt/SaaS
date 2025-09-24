@@ -1,6 +1,7 @@
 {% extends 'layout/manage.html' %}
-
+{% load static %}
 {% block CSS %}
+    <link rel="stylesheet" href="{% static 'plugins/editor.md-master/css/editormd.css' %}">
     <style>
         .title-list {
             border-right: 1px solid silver;
@@ -22,6 +23,19 @@
         .panel-body {
             padding: 0;
         }
+
+        .title-list ul {
+            padding-left: 15px;
+        }
+
+        .title-list ul a {
+            display: block;
+            padding: 5px 0;
+        }
+
+        .editormd-fullscreen{
+            z-index: 1001;
+        }
     </style>
 {% endblock %}
 
@@ -42,17 +56,31 @@
             <div class="panel-body">
                 <div class="col-sm-3 title-list">
                     <div>目录</div>
+                    <ul id="catalog">
+
+                    </ul>
+
                 </div>
                 <div class="col-sm-9 content">
 
                     <form method="post">
                         {% csrf_token %}
                         {% for field in form %}
-                        <div class="form-group">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            <span style="color: red" class="error-mag">{{ field.errors.0 }}</span>
-                        </div>
+                            {% if field.name == 'content' %}
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    <div id="editor">
+                                        {{ field }}
+                                    </div>
+                                    <span style="color: red" class="error-mag">{{ field.errors.0 }}</span>
+                                </div>
+                            {% else %}
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                    <span style="color: red" class="error-mag">{{ field.errors.0 }}</span>
+                                </div>
+                            {% endif %}
                         {% endfor %}
                         <button type="submit" class="btn btn-primary">提 交</button>
                     </form>
@@ -62,3 +90,51 @@
         </div>
     </div>
 {% endblock %}]
+
+{% block JS %}
+    <script src="{% static 'JS/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static  'plugins/editor.md-master/editormd.min.js' %}"></script>
+    <script>
+        var WIKI_DETAIL_URL = "{% url 'wiki' project_id=request.tracer.project.id %}";
+        $(function () {
+            initCatalog();
+            initEditorMd();
+        })
+
+        // 初始化markdown编辑器，将textarea转化为markdown编辑器
+        function initEditorMd() {
+            editormd('editor', {
+                placeholder: "请输入内容",
+                height: 500,
+                path: "{% static 'plugins/editor.md-master/lib/' %}"
+            })
+        }
+
+        function initCatalog() {
+            $.ajax({
+                url: "{% url 'wiki_catalog' project_id=request.tracer.project.id %}",
+                type: "GET",
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res)
+                    if (res.status) {
+                        $.each(res.data, function (index, item) {
+                            var href = WIKI_DETAIL_URL + "?wiki_id=" + item.id
+
+                            if (!item.parent_id) {
+                                var li = $("<li>").attr('id', "id_" + item.id).append($("<a>").text(item.title).attr('href', href)).append($("<ul>"));
+                                $("#catalog").append(li)
+                            } else {
+                                var li = $("<li>").attr('id', "id_" + item.id).append($("<a>").text(item.title).attr('href', href)).append($("<ul>"));
+                                $("#id_" + item.parent_id).children('ul').append(li)
+                            }
+                        })
+                    } else {
+
+                        alert('初始化目录失败')
+                    }
+                }
+            })
+        }
+    </script>
+{% endblock %}

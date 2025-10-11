@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-
+import time
 from web import models
 from web.forms.project import ProjectModelForm
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-
+import uuid
 from web.models import Project
 
 
@@ -32,6 +32,15 @@ def project_list(request):
         return render(request, 'project_list.html', {'form': form, 'project_dict': project_dict})
     form = ProjectModelForm(request, data=request.POST)
     if form.is_valid():
+        # 还需要在项目创建时创建一个项目腾讯COS桶
+        from utils.cos import create_bucket
+        name = form.cleaned_data['name']
+        random_id = uuid.uuid4().hex[:8]
+        bucket = name+random_id + "-1381991211"
+        region = 'ap-guangzhou'
+        create_bucket(bucket=bucket, region=region)
+        form.instance.bucket = bucket
+        form.instance.region = region
         form.instance.creator = request.tracer.user  # 以当前的登录用户为创建者,这个不写数据库将无法保存，也不报错。
         form.save()
         return JsonResponse({'status': True})

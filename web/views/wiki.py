@@ -3,6 +3,10 @@ from web.forms.wiki import WikiModelForm
 from django.urls import reverse  # 反向生成URL
 from web import models
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from utils.cos import upload_file
+import uuid
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 
 def wiki(request, project_id):
@@ -81,3 +85,36 @@ def wiki_edit(request, project_id, wiki_id):
         form.save()
         url = reverse('wiki', kwargs={'project_id': project_id})
         return redirect(url)
+
+
+@csrf_exempt
+@xframe_options_exempt
+def wiki_upload(request, project_id):
+    """markdown图片上传"""
+    result = {  # 返回给markdown的数据
+        'success': 0,  # 0失败，1成功
+        'message': None,
+        'url': None
+    }
+    img_object = request.FILES.get('editormd-image-file')
+    if not img_object:  # 判断文件对象是否存在
+        result['message'] = '文件不存在'
+        return JsonResponse(result)
+
+    ext = img_object.name.rsplit('.')[-1]
+    random_id = uuid.uuid4().hex[:8]
+    key = "{}.{}".format(random_id, ext)
+    print(key)
+    print(request.tracer.project.bucket)
+    img_url = upload_file(  # 将文件上传至桶然后得到桶的文件url
+        request.tracer.project.bucket,
+        request.tracer.project.region,
+        img_object,
+        key,
+    )
+    print(img_url)
+
+    result['url'] = img_url
+    result['success'] = 1
+    print(result)
+    return JsonResponse(result)

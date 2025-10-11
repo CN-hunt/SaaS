@@ -106,7 +106,10 @@
             editormd('editor', {
                 placeholder: "请输入内容",
                 height: 500,
-                path: "{% static 'plugins/editor.md-master/lib/' %}"
+                path: "{% static 'plugins/editor.md-master/lib/' %}",
+                imageUpload:true, //添加这个实现markdown本地上传文件
+                imageFormats:["jpg",'jpeg','png','gif'], //支持的上传格式
+                imageUploadURL:"{% url 'wiki_upload' project_id=request.tracer.project.id %}", //上传路径
             })
         }
 

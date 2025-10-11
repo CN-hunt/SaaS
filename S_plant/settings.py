@@ -134,6 +134,11 @@ WHITE_REGEX_URL_LIST = [
     '/index/',
 ]
 
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+
 try:
     from .local_settings import *
 except ImportError:

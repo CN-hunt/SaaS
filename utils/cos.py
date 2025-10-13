@@ -18,6 +18,7 @@ def create_bucket(bucket, region='ap-guangzhou'):
     )
 
 
+
 def upload_file(bucket, region,file_obj, key):
     secret_id = local_settings.Tencent_cos_id
     secret_key = local_settings.Tencent_cos_key
@@ -29,6 +30,7 @@ def upload_file(bucket, region,file_obj, key):
         Body=file_obj,  # 被存储的文件对象
         Key=key  # 上传给桶的文件名
     )
+
     # 还需要接收上传到桶里面的文件路径
     # https://sakura-1381991211.cos.ap-guangzhou.myqcloud.com/text.png
     return 'https://{}.cos.{}.myqcloud.com/{}'.format(bucket, region, key)

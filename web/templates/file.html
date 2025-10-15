@@ -1,5 +1,120 @@
 {% extends 'layout/manage.html' %}
+{% load static %}
 
 {% block content %}
-	<h2>文件</h2>
+    <div class="container-fluid">
+
+        <div class="panel panel-default" style="margin-top: 30px">
+            <!-- Default panel contents -->
+            <div class="panel-heading clearfix">
+                <div style="float: left">导航</div>
+                <div style="float: right">
+                    <a href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#myModal"
+                       data-whatever="新建文件夹">新建文件夹</a>
+                </div>
+            </div>
+            <!-- Table -->
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Username</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>@mdo</td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Jacob</td>
+                    <td>Thornton</td>
+                    <td>@fat</td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>Larry</td>
+                    <td>the Bird</td>
+                    <td>@twitter</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="form">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                <span class="error-msg">{{ field.errors.0 }}</span>
+                            </div>
+                        {% endfor %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
+                    <button type="button" id="btnFormSubmit" class="btn btn-primary">确 定</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}]
+
+{% block JS %}
+    <script src="{% static 'JS/jquery-3.7.1.min.js' %}"></script>
+    <script>
+        $(function () {
+            initModal()
+            bindModelSubmit()
+        })
+
+        function initModal() {
+            $('#myModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget); // Button that triggered the modal
+                var recipient = button.data('whatever') // Extract info from data-* attributes
+                var modal = $(this);
+                modal.find('.modal-title').text(recipient)
+                $("#form")[0].reset()
+            })
+        }
+
+        function bindModelSubmit() {
+            $("#btnFormSubmit").click(function () {
+                $.ajax({
+                    url: location.href,
+                    type: "POST",
+                    data: $("#form").serialize(),
+                    dataType: "JSON",
+                    success: function (res) {
+                        console.log(res)
+                        if (res.status) {
+                            location.reload()
+                        } else {
+                            $.each(res.error, function (key, value) {
+                                $("#id_" + key).next().text(value[0])
+                            })
+                        }
+                    }
+                })
+            })
+        }
+    </script>
+{% endblock %}

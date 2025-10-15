@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from web.views import account, home, project, manage,wiki
+from web.views import account, home, project, manage,wiki,file
 
 from app01 import views
 
@@ -28,7 +28,7 @@ urlpatterns = [
         path('dashboard/', manage.dashboard, name='dashboard'),
         path('issues/', manage.issues, name='issues'),
         path('statistics/', manage.statistics, name='statistics'),
-        path('file/', manage.file, name='file'),
+        # path('file/', manage.file, name='file'),
 
         path('wiki/', wiki.wiki, name='wiki'),
         path('wiki/add/', wiki.wiki_add, name='wiki_add'),
@@ -37,6 +37,8 @@ urlpatterns = [
         path('wiki/edit/<int:wiki_id>/', wiki.wiki_edit, name='wiki_edit'),
         path('wiki/upload/', wiki.wiki_upload, name='wiki_upload'),  # 文件上传
         # path('wiki/detail/', wiki.wiki_detail, name='wiki_detail'),
+
+        path('file/',file.file, name='file'),  # 文件操作
 
 
         path('setting/', manage.setting, name='setting'),

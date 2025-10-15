@@ -36,7 +36,10 @@
                     {% if request.tracer.project %}
                         <li><a href="{% url 'dashboard' project_id=request.tracer.project.id %}">概述</a></li>
                         <li><a href="{% url 'issues' project_id=request.tracer.project.id %}">问题</a></li>
+                        <li><a href="#">统计</a></li>
                         <li><a href="{% url 'wiki' project_id=request.tracer.project.id %}">wiki</a></li>
+                        <li><a href="{% url 'file' project_id=request.tracer.project.id %}">文件</a></li>
+                        <li><a href="#">配置</a></li>
                     {% endif %}
                 </ul>
 

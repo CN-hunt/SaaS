@@ -7,7 +7,18 @@
         <div class="panel panel-default" style="margin-top: 30px">
             <!-- Default panel contents -->
             <div class="panel-heading clearfix">
-                <div style="float: left">导航</div>
+                <div style="float: left">
+                    <a href="{% url 'file' project_id=request.tracer.project.id %}">
+                        <i class="fa fa-home" aria-hidden="true"></i>
+                        <span>文件库</span>
+                    </a>
+                    {% for record in breadcrumb_list %}
+                        <a href="{% url 'file' project_id=request.tracer.project.id %}?folder={{ record.id }}">
+                            <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                            <span>{{ record.name }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
                 <div style="float: right">
                     <a href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#myModal"
                        data-whatever="新建文件夹">新建文件夹</a>
@@ -17,31 +28,51 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>#</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
+                    <th>名称</th>
+                    <th>文件大小</th>
+                    <th>更新者</th>
+                    <th>更新时间</th>
+                    <th>操 作</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                </tr>
+
+                {% for item in file_object_list %}
+                    <tr>
+                        <td>
+                            {% if item.file_type == 2 %}
+                                <a href="{% url 'file' project_id=request.tracer.project.id %}?folder={{ item.id }}">
+                                    <i class="fa fa-folder-open" aria-hidden="true"></i>
+                                    {{ item.name }}
+                                </a>
+                            {% else %}
+                                <i class="fa fa-file" aria-hidden="true"></i>
+                                {{ item.name }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.file_type == 1 %}
+                                {{ item.file_size }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ item.update_user.username }}</td>
+                        <td>{{ item.update_datetime }}</td>
+                        <td>
+                            {% if item.file_type == 2 %}
+                                <a href="#" data-toggle="modal" data-target="#myModal"
+                                   data-whatever="编辑文件夹">
+                                    <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                                </a>
+                            {% endif %}|
+                            <a href="#">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
                 </tbody>
             </table>
         </div>

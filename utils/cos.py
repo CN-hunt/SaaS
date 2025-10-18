@@ -18,8 +18,7 @@ def create_bucket(bucket, region='ap-guangzhou'):
     )
 
 
-
-def upload_file(bucket, region,file_obj, key):
+def upload_file(bucket, region, file_obj, key):
     secret_id = local_settings.Tencent_cos_id
     secret_key = local_settings.Tencent_cos_key
     config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
@@ -34,3 +33,16 @@ def upload_file(bucket, region,file_obj, key):
     # 还需要接收上传到桶里面的文件路径
     # https://sakura-1381991211.cos.ap-guangzhou.myqcloud.com/text.png
     return 'https://{}.cos.{}.myqcloud.com/{}'.format(bucket, region, key)
+
+
+def delete_file(bucket, region, file_obj, key):
+    secret_id = local_settings.Tencent_cos_id
+    secret_key = local_settings.Tencent_cos_key
+    config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
+    client = CosS3Client(config)
+
+    response = client.delete_objects(
+        Bucket=bucket,
+        Key=key  # 上传给桶的文件名
+    )
+

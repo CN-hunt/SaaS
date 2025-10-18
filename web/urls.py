@@ -39,6 +39,7 @@ urlpatterns = [
         # path('wiki/detail/', wiki.wiki_detail, name='wiki_detail'),
 
         path('file/',file.file, name='file'),  # 文件操作
+        path('file/delete/',file.file_delete, name='file_delete'),  # 删除文件夹
 
 
         path('setting/', manage.setting, name='setting'),

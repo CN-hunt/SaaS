@@ -46,3 +46,19 @@ def delete_file(bucket, region, file_obj, key):
         Key=key  # 上传给桶的文件名
     )
 
+
+def delete_file_list(bucket, region, file_obj, key_list):
+    secret_id = local_settings.Tencent_cos_id
+    secret_key = local_settings.Tencent_cos_key
+    config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
+    client = CosS3Client(config)
+
+    objects = {  # 源码里面要求这样传文件
+        "Quiet": "true",
+        "Object": key_list,
+    }
+    client.delete_objects(
+
+        Bucket=bucket,
+        Delete=objects
+    )

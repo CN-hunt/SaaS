@@ -20,6 +20,7 @@
                     {% endfor %}
                 </div>
                 <div style="float: right">
+                    <input type="file" multiple style="float: right;margin-left: 10px;margin-top: -2px" class="btn-xs btn-default" id="uploadFile">
                     <a href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#myModal"
                        data-whatever="新建文件夹">新建文件夹</a>
                 </div>
@@ -140,10 +141,16 @@
 {% block JS %}
     <script src="{% static 'JS/jquery-3.7.1.min.js' %}"></script>
     <script>
+        // 临时凭证
+        var COS_OBJECT = new COS({
+
+        })
+
         $(function () {
             initModal()
             bindModelSubmit()
             bindDeleteSubmit()
+            bindUploadFile()
         })
 
         function initModal() {
@@ -211,6 +218,16 @@
 
                 })
             })
+        }
+        function bindUploadFile() {
+            // 临时凭证获取
+            $("#uploadFile").change(function () {
+               var filelist = $(this)[0].files;
+               $.each(filelist,function (index,fileObject) {
+                   console.log(fileObject.name);
+                   //文件删上传
+               })
+            });
         }
     </script>
 {% endblock %}

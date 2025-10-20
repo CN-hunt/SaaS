@@ -23,8 +23,8 @@ body {
 }
 
 .navbar-av {
-    background-color: #499ef3;
-    border-color: #499ef3;
+    background-color: hotpink;
+    border-color: hotpink;
 }
 
 .navbar-av .navbar-brand {
@@ -35,7 +35,7 @@ body {
 .navbar-av .navbar-brand:hover,
 .navbar-av .navbar-brand:focus {
     color: #ffffff;
-    background-color: #4dabff;
+    background-color: hotpink;
 }
 
 .navbar-av .navbar-text {
@@ -54,7 +54,7 @@ body {
 
 .navbar-av .navbar-nav > li > a {
     color: #ffffff;
-    background-color: #499ef3;
+    background-color: hotpink;
     padding-left: 13px;
     padding-right: 13px;
 
@@ -63,7 +63,7 @@ body {
 .navbar-av .navbar-nav > li > a:hover,
 .navbar-av .navbar-nav > li > a:focus {
     color: #ffffff;
-    background-color: #4dabff;
+    background-color: hotpink;
 
 }
 
@@ -79,16 +79,16 @@ body {
 .navbar-av .navbar-nav > .disabled > a:hover,
 .navbar-av .navbar-nav > .disabled > a:focus {
     color: #ffffff;
-    background-color: #4dabff;
+    background-color: hotpink;
 }
 
 .navbar-av .navbar-toggle {
-    border-color: #499ef3;
+    border-color: hotpink;
 }
 
 .navbar-av .navbar-toggle:hover,
 .navbar-av .navbar-toggle:focus {
-    background-color: #4dabff;
+    background-color: hotpink;
 }
 
 .navbar-av .navbar-toggle .icon-bar {
@@ -104,7 +104,7 @@ body {
 .navbar-av .navbar-nav > .open > a:hover,
 .navbar-av .navbar-nav > .open > a:focus {
     color: #ffffff;
-    background-color: #4dabff;
+    background-color: hotpink;
 }
 
 @media (max-width: 767px) {
@@ -114,27 +114,27 @@ body {
 
     .navbar-av .navbar-nav .open .dropdown-menu > li > a {
         color: #ffffff;
-        background-color: #499ef3;
+        background-color: hotpink;
     }
 
     .navbar-av .navbar-nav .open .dropdown-menu > li > a:hover,
     .navbar-av .navbar-nav .open .dropdown-menu > li > a:focus {
         color: #ffffff;
-        background-color: #4dabff;
+        background-color: hotpink;
     }
 
     .navbar-av .navbar-nav .open .dropdown-menu > .active > a,
     .navbar-av .navbar-nav .open .dropdown-menu > .active > a:hover,
     .navbar-av .navbar-nav .open .dropdown-menu > .active > a:focus {
         color: #ffffff;
-        background-color: #4dabff;
+        background-color: hotpink;
     }
 
     .navbar-av .navbar-nav .open .dropdown-menu > .disabled > a,
     .navbar-av .navbar-nav .open .dropdown-menu > .disabled > a:hover,
     .navbar-av .navbar-nav .open .dropdown-menu > .disabled > a:focus {
         color: #ffffff;
-        background-color: #4dabff;
+        background-color: hotpink;
     }
 }
 

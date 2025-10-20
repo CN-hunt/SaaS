@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.http import StreamingHttpResponse, FileResponse
 import requests
-from utils.cos import delete_file
+from utils.cos import delete_file, delete_file_list
 
 from web.forms.file import FolderModelForm
 from web import models
@@ -74,11 +74,32 @@ def file_delete(request, project_id):
         request.tracer.project.use_space -= delete_object.file_size
         request.tracer.project.save()
         # cos删除文文件
-        delete_file(request.tracer.project.bucket, request.tracer.project.region,delete_object.key)
+        delete_file(request.tracer.project.bucket, request.tracer.project.region, delete_object.key)
         # 数据库删除
         delete_object.delete()
         return JsonResponse({'status': True})
-    else:
-        # 文件夹删除同样也要删除cos
-        pass
+
+    total_size = 0
+    folder_list = [delete_object, ]
+    key_list = []
+    for folder in folder_list:
+        child_list = models.FileRepository.objects.filter(project=request.tracer.project, parent=folder).order_by(
+            '-file_type')
+        for child in child_list:
+            if child.file_type == 2:
+                folder_list.append(child)
+            else:
+                total_size += child.file_size
+                key_list.append({'Key': child.key})
+
+    # cos批量删除文件
+    if key_list:
+        delete_file_list(request.tracer.project.bucket, request.tracer.project.region, key_list)
+
+    # 归还容量
+    if total_size:
+        request.tracer.project.use_space -= total_size
+        request.tracer.project.save()
+    # 数据库文件的删除
+    delete_object.delete()
     return JsonResponse({'status': True})

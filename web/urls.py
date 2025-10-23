@@ -40,6 +40,7 @@ urlpatterns = [
 
         path('file/',file.file, name='file'),  # 文件操作
         path('file/delete/',file.file_delete, name='file_delete'),  # 删除文件夹
+        path('cos/credentials/',file.cos_credentials, name='cos_credentials'),
 
 
         path('setting/', manage.setting, name='setting'),

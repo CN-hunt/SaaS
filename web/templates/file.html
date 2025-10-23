@@ -20,7 +20,8 @@
                     {% endfor %}
                 </div>
                 <div style="float: right">
-                    <input type="file" multiple style="float: right;margin-left: 10px;margin-top: -2px" class="btn-xs btn-default" id="uploadFile">
+                    <input type="file" multiple style="float: right;margin-left: 10px;margin-top: -2px"
+                           class="btn-xs btn-default" id="uploadFile">
                     <a href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#myModal"
                        data-whatever="新建文件夹">新建文件夹</a>
                 </div>
@@ -140,11 +141,11 @@
 
 {% block JS %}
     <script src="{% static 'JS/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'JS/cos-js-sdk-v5.min.js' %}"></script>
     <script>
         // 临时凭证
-        var COS_OBJECT = new COS({
+        var COS_CREDENTIAL = "{% url 'cos_credentials' project_id=request.tracer.project.id %}"
 
-        })
 
         $(function () {
             initModal()
@@ -177,7 +178,7 @@
             $('#alertModal').on('show.bs.modal', function (event) {
                 var button = $(event.relatedTarget); // Button that triggered the modal
                 var fid = button.data('fid') //获取自己绑定的fid
-                $("#btnDelete").attr('fid',fid)
+                $("#btnDelete").attr('fid', fid)
 
             })
         }
@@ -202,16 +203,17 @@
                 })
             })
         }
+
         function bindDeleteSubmit() {
-            $("#btnDelete").click(function (){
+            $("#btnDelete").click(function () {
                 //必须首先要获取需要删除的对象的ID
 
                 $.ajax({
-                    url:"{% url 'file_delete' project_id=request.tracer.project.id %}",
-                    type:"GET",
-                    data:{fid:$(this).attr('fid')},
-                    success:function (res) {
-                        if(res.status){
+                    url: "{% url 'file_delete' project_id=request.tracer.project.id %}",
+                    type: "GET",
+                    data: {fid: $(this).attr('fid')},
+                    success: function (res) {
+                        if (res.status) {
                             location.reload()
                         }
                     }
@@ -219,14 +221,54 @@
                 })
             })
         }
+
         function bindUploadFile() {
             // 临时凭证获取
             $("#uploadFile").change(function () {
-               var filelist = $(this)[0].files;
-               $.each(filelist,function (index,fileObject) {
-                   console.log(fileObject.name);
-                   //文件删上传
-               })
+                var filelist = $(this)[0].files;
+
+                // 获取每次上传的每个文件的大小和名称
+                var checkFilelist = []
+                $.each(filelist, function (index, fileObject) {
+                    checkFilelist.push({'name': fileObject.name, 'size': fileObject.size})
+                })
+                // 将数据发送到后台再由后台校验，没问题才返回临时凭证，否则返回错误信息
+                var cos_credentials = new COS({
+                    getAuthorization: function (options, callback) {
+                        $.post(COS_CREDENTIAL,JSON.stringify(checkFilelist), function (data) {
+                            var credentials = data && data.credentials;
+                            if (!data || !credentials) return console.log('credentials invalid');
+                            callback({
+                                TmpSecretId: credentials.tmpSecretId,
+                                TmpSecretKey: credentials.tmpSecretKey,
+                                XCosSecurityToken: credentials.sessionToken,
+                                StartTime: data.startTime,
+                                ExpiredTime: data.expiredTime
+                            });
+                        });
+                    }
+                });
+
+                // 上传文件
+                $.each(filelist, function (index, fileObject) {
+                    var fileName = fileObject.name;
+                    // 上传文件（异步）
+                    cos_credentials.putObject({
+                        Bucket: '{{ request.tracer.project.bucket }}', /* 必须 */
+                        Region: '{{ request.tracer.project.region }}',     /* 存储桶所在地域，必须字段 */
+                        Key: fileName,              /* 必须 */
+                        Body: fileObject, // 上传文件对象
+                        onProgress: function (progressData) {
+                            console.log({{ request.tracer.project.bucket }})
+                            console.log("文件上传进度--->", fileName, JSON.stringify(progressData));
+                        }
+                    }, function (err, data) {
+                        console.log()
+                        console.log(err || data);
+                    });
+
+                })
+
             });
         }
     </script>

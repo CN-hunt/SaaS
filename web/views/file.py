@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.http import StreamingHttpResponse, FileResponse
 import requests
-from utils.cos import delete_file, delete_file_list
+from utils.cos import delete_file, delete_file_list, credential
 
 from web.forms.file import FolderModelForm
 from web import models
@@ -103,3 +103,27 @@ def file_delete(request, project_id):
     # 数据库文件的删除
     delete_object.delete()
     return JsonResponse({'status': True})
+
+
+@csrf_exempt
+def cos_credentials(request, project_id):
+    # 获取需要上传的文件和文件大小
+    per_file_limit = request.tracer.price_policy.per_file_size * 1024 * 1024
+
+    total_size = 0
+    file_list = json.loads(request.body.decode('utf-8'))
+    for item in file_list:
+        if item['size'] > per_file_limit:
+            msg = '文件超出大小(最大{}M)，文件{}'.format(request.tracer.price_policy.per_file_size, item['name'])
+            return JsonResponse({'status': False, 'error': '文件超出大小'})
+        total_size += item['size']
+
+    # 总容量的限制
+    #request.tracer.price_policy.project_space  # 允许空间
+    #request.tracer.project.use_space  # 已使用空间
+    if request.tracer.project.use_space + total_size > request.tracer.price_policy.project_space:
+        return JsonResponse({'status': False, 'error': '超出容量请升级套餐'})
+
+    """获取cos上传时的临时凭证"""
+    data_dict = credential(request.tracer.project.bucket, request.tracer.project.region)
+    return JsonResponse(data_dict)

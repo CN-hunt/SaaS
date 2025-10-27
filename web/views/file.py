@@ -109,6 +109,7 @@ def file_delete(request, project_id):
 def cos_credentials(request, project_id):
     # 获取需要上传的文件和文件大小
     per_file_limit = request.tracer.price_policy.per_file_size * 1024 * 1024
+    total_file_limit = request.tracer.price_policy.project_space * 1024 * 1024 * 1024
 
     total_size = 0
     file_list = json.loads(request.body.decode('utf-8'))
@@ -121,9 +122,14 @@ def cos_credentials(request, project_id):
     # 总容量的限制
     #request.tracer.price_policy.project_space  # 允许空间
     #request.tracer.project.use_space  # 已使用空间
-    if request.tracer.project.use_space + total_size > request.tracer.price_policy.project_space:
+    if request.tracer.project.use_space + total_size > total_file_limit:
         return JsonResponse({'status': False, 'error': '超出容量请升级套餐'})
 
     """获取cos上传时的临时凭证"""
     data_dict = credential(request.tracer.project.bucket, request.tracer.project.region)
-    return JsonResponse(data_dict)
+    return JsonResponse({'status': True, 'data': data_dict})
+
+
+def file_post(request, project_id):
+    """将上传成功的文件写入数据库"""
+    pass

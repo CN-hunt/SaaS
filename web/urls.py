@@ -41,6 +41,7 @@ urlpatterns = [
         path('file/',file.file, name='file'),  # 文件操作
         path('file/delete/',file.file_delete, name='file_delete'),  # 删除文件夹
         path('cos/credentials/',file.cos_credentials, name='cos_credentials'),
+        path('file/post/', file.file_post, name='file_post'),  # 将上传至腾讯cos的文件写入数据库
 
 
         path('setting/', manage.setting, name='setting'),

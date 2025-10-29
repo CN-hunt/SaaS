@@ -10,7 +10,7 @@
             width: 400px;
         }
 
-        .upload-Progress .progress-error{
+        .upload-Progress .progress-error {
 
         }
     </style>
@@ -51,19 +51,19 @@
                     <th>操 作</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="rowList">
 
                 {% for item in file_object_list %}
                     <tr>
                         <td>
-                            {% if item.file_type == 2 %}
-                                <a href="{% url 'file' project_id=request.tracer.project.id %}?folder={{ item.id }}">
-                                    <i class="fa fa-folder-open" aria-hidden="true"></i>
-                                    {{ item.name }}
-                                </a>
-                            {% else %}
+                            {% if item.file_type == 1 %}
                                 <i class="fa fa-file" aria-hidden="true"></i>
                                 {{ item.name }}
+                            {% else %}
+                                <a href="{% url 'file' project_id=request.tracer.project.id %}?folder={{ item.id }}">
+                                    <i class="fa fa-folder" aria-hidden="true"></i>
+                                    {{ item.name }}
+                                </a>
                             {% endif %}
                         </td>
                         <td>
@@ -77,22 +77,26 @@
                         <td>{{ item.update_datetime }}</td>
                         <td>
                             {% if item.file_type == 2 %}
-                                <a href="#"
+                                <a class="btn btn-default btn-xs"
                                    data-toggle="modal"
-                                   data-target="#myModal"
+                                   data-target="#addModal"
                                    data-name="{{ item.name }}"
                                    data-fid="{{ item.id }}"
-                                   data-whatever="编辑文件夹">
-                                    <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                                   data-whatever="修改文件夹">
+                                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                                 </a>
-                            {% endif %}|
-                            <a href="#">
-                                <span class="glyphicon glyphicon-trash "
-                                      style="color: red"
-                                      aria-hidden="true"
-                                      data-toggle="modal"
-                                      data-fid="{{ item.id }}"
-                                      data-target="#alertModal"></span>
+                            {% else %}
+{#                                <a class="btn btn-default btn-xs"#}
+{#                                   href="{% url 'file_download' project_id=request.tracer.project.id file_id=item.id %}">#}
+{#                                    <i class="fa fa-cloud-download" aria-hidden="true"></i>#}
+{#                                </a>#}
+                            {% endif %}
+
+                            <a class="btn btn-danger btn-xs"
+                               data-toggle="modal"
+                               data-fid="{{ item.id }}"
+                               data-target="#alertModal">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
                             </a>
                         </td>
                     </tr>
@@ -186,6 +190,29 @@
         </table>
     </div>
 
+    <div class="hide">
+        <table id="rowTpl">
+            <tr>
+                <td>
+                    <i class="fa fa-file" aria-hidden="true"></i>
+                    <span class="name"></span>
+                </td>
+                <td class="file_size"></td>
+                <td class="username"></td>
+                <td class="datetime"></td>
+                <td>
+                    <a class="btn btn-default btn-xs download">
+                        <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                    </a>
+
+                    <a class="btn btn-danger btn-xs delete" data-toggle="modal" data-target="#alertModal">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
 {% endblock %}]
 
 {% block JS %}
@@ -196,6 +223,7 @@
         var COS_CREDENTIAL = "{% url 'cos_credentials' project_id=request.tracer.project.id %}"
         // 上传至腾讯cos的文件保存到本地
         var FILE_POST = "{% url 'file_post' project_id=request.tracer.project.id %}"
+        var CURRENT_FOLDER_ID = "{{ folder_object.id }}"
 
 
         $(function () {
@@ -312,35 +340,46 @@
                 $.each(filelist, function (index, fileObject) {
                     var fileName = fileObject.name;
                     var fileSize = fileObject.size;
-                    var key = (new  Date()).getTime() + '_' + fileName;
+                    var key = (new Date()).getTime() + '_' + fileName;
                     // 上传文件（异步）
 
                     //以下代码处理上传进度条哦
-                    var tr =  $('#progressTemplate').find('tr').clone();
+                    var tr = $('#progressTemplate').find('tr').clone();
                     tr.find('.name').text(fileName);
                     $("#progressList").append(tr);
 
                     cos_credentials.putObject({
                         Bucket: '{{ request.tracer.project.bucket }}', /* 必须 */
                         Region: '{{ request.tracer.project.region }}',     /* 存储桶所在地域，必须字段 */
-                        Key: fileName,              /* 必须 */
-                        Body: key, // 上传文件对象
+                        Key: key,              /* 必须 */
+                        Body: fileObject, // 上传文件对象
                         onProgress: function (progressData) {
-                            var percent = progressData.percent * 100 + "%" ;
+                            var percent = progressData.percent * 100 + "%";
                             tr.find('.progress-bar').text(percent);
-                            tr.find('.progress-bar').css('width',percent);
+                            tr.find('.progress-bar').css('width', percent);
                         }
                     }, function (err, data) {
-                        console.log(err || data);
-                        if(data && data.statusCode ===200){
+                        if (data && data.statusCode === 200) {
                             //上传成功之后，将上传的文件提交至后台，写入数据库
-                            $.post(FILE_POST,{
-                                name:fileName,
-                                key:key,
-                                size:fileSize},function (res){
-                                console.log()
+                            $.post(FILE_POST, {
+                                name: fileName,
+                                key: key,
+                                file_size: fileSize,
+                                parent: CURRENT_FOLDER_ID,
+                                etag: data.ETag,
+                                file_path: data.Location
+                            }, function (res) {
+                                //将写入数据库的内容动态展示在界面上
+                                var newTr = $("#rowTpl").find('tr').clone()
+                                newTr.find('.name').text(res.data.name);
+                                newTr.find('.file_size').text(res.data.file_size);
+                                newTr.find('.username').text(res.data.username);
+                                newTr.find('.datetime').text(res.data.datetime);
+                                newTr.find('.delete').attr('data-fid', res.data.id);
+
+                                $("#rowList").append(newTr);
                             })
-                        }else {
+                        } else {
                             tr.find("#progress-error").text('上传失败');
                         }
                     });

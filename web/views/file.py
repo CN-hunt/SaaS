@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
 from django.forms import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
@@ -10,6 +10,7 @@ from utils.cos import delete_file, delete_file_list, credential
 
 from web.forms.file import FolderModelForm, FileModelForm
 from web import models
+from django.urls import reverse
 
 
 def file(request, project_id):
@@ -143,12 +144,12 @@ def file_post(request, project_id):
     etag:data.ETag,
     file_path:data.Location
     """
-    form = FileModelForm(request,data=request.POST)
+    form = FileModelForm(request, data=request.POST)
     if form.is_valid():
         #  校验通过写入数据库
         data_dict = form.cleaned_data
         data_dict.pop('etag')
-        data_dict.update({'project': request.tracer.project,'file_type': 1,'update_user': request.tracer.user})
+        data_dict.update({'project': request.tracer.project, 'file_type': 1, 'update_user': request.tracer.user})
         instance = models.FileRepository.objects.create(**data_dict)
 
         # 项目已使用空间的更新
@@ -160,9 +161,23 @@ def file_post(request, project_id):
             'file_size': instance.file_size,
             'username': instance.update_user.username,
             'datetime': instance.update_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+            'download_url': reverse('file_download', kwargs={'project_id': project_id, 'file_id': instance.id}),
             # 'file_type': instance.get_file_type_display(),
 
         }
         return JsonResponse({'status': True, 'data': result})
 
     return JsonResponse({'status': False, 'error': '文件错误'})
+
+
+def file_download(request, project_id, file_id):
+    """文件下载"""
+    import requests
+    file_object = models.FileRepository.objects.filter(id=file_id, project_id=project_id).first()
+    res = requests.get(file_object.file_path)
+    data = res.content
+
+    response = HttpResponse(data)
+    # 设置响应头，浏览器看到这个就会启动下载
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(file_object.name)
+    return response

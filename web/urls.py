@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from web.views import account, home, project, manage,wiki,file
+from web.views import account, home, project, manage,wiki,file,setting
 
 from app01 import views
 
@@ -42,9 +42,11 @@ urlpatterns = [
         path('file/delete/',file.file_delete, name='file_delete'),  # 删除文件夹
         path('cos/credentials/',file.cos_credentials, name='cos_credentials'),
         path('file/post/', file.file_post, name='file_post'),  # 将上传至腾讯cos的文件写入数据库
+        path('file/download/<int:file_id>/', file.file_download, name='file_download'),  # 文件下载
 
 
-        path('setting/', manage.setting, name='setting'),
+        path('setting/', setting.setting, name='setting'),
+        path('setting/delete/', setting.delete, name='setting_delete'),
     ], )),
 
 ]

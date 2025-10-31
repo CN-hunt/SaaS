@@ -4,6 +4,8 @@ import sys
 import os
 import logging
 from django.conf import settings
+from setuptools._vendor.more_itertools.more import bucket
+
 from S_plant import local_settings
 
 
@@ -128,3 +130,46 @@ def credential(bucket, region):
     sts = Sts(config)
     result_dict = sts.get_credential()
     return result_dict
+
+
+def delete_bucket(region, bucket):
+    """删除桶，
+    必须先删除文件
+    再删除碎片
+    再删除桶
+    """
+    secret_id = local_settings.Tencent_cos_id
+    secret_key = local_settings.Tencent_cos_key
+    config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
+    client = CosS3Client(config)
+
+    try:
+        while True:  # 这里一次最多只能取到1000个所以要循环
+            # 找到桶中所有所有的文件
+            part_objects = client.list_objects(bucket=bucket)
+
+            # 检查是否删除完毕
+            contents = part_objects.get('Contents')
+            if not contents:
+                break
+            # 批量删除
+
+            objects = {  # 源码里面要求这样传文件
+                "Quiet": "true",
+                "Object": [{'key': item["Key"]} for item in contents]
+            }
+            client.delete_objects(bucket=bucket, Delete=objects)
+        # 删碎片
+        while True:
+            park_uploads = client.list_multipart_uploads(bucket)
+            uploads = park_uploads.get('Uploads')
+            if not uploads:
+                break
+            for item in uploads:
+                client.abort_multipart_upload(bucket, item["Key"], item["UploadId"])
+            if park_uploads['IsTruncated'] == 'False':
+                break
+
+        client.delete_bucket(bucket)
+    except:
+        pass

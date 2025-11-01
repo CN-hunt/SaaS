@@ -1,198 +1,25 @@
 {% extends 'layout/manage.html' %}
 {% load static %}
+
 {% block CSS %}
     <link rel="stylesheet" href="{% static 'plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/editor.md-master/css/editormd.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/bootstrap-select/css/bootstrap-select.min.css' %}">
-
-    <style>
-        .issues-list .number {
-            width: 100px;
-            text-align: right;
-        }
-
-        .issues-list .number a {
-            font-weight: 500;
-            padding: 0 10px;
-        }
-
-        .issues-list .issue .tags {
-            padding: 10px 0;
-        }
-
-        .issues-list .issue .tags span {
-            margin-right: 20px;
-            display: inline-block;
-            font-size: 12px;
-        }
-
-        .issues-list .issue .tags .type {
-            color: white;
-            padding: 1px 5px;
-            border-radius: 5px;
-            background-color: #FF69B4;
-        }
-
-        .editormd {
-            margin-bottom: 0;
-        }
-
-        .pd-0 {
-            padding: 0 !important;
-        }
-
-        /* 筛选 */
-        .filter-area .item {
-            margin-bottom: 15px;
-        }
-
-        .filter-area .item .title {
-            padding: 5px 0;
-        }
-
-        .filter-area .item .check-list a {
-            text-decoration: none;
-            display: inline-block;
-            min-width: 65px;
-        }
-
-        .filter-area .item .check-list label {
-            font-weight: 200;
-            font-size: 13px;
-            margin-left: 3px;
-        }
-
-        .filter-area .item .check-list a:hover {
-            font-weight: 300;
-        }
-
-        .filter-area .item .check-list .cell {
-            margin-right: 10px;
-        }
-
-        .error-msg {
-            color: red;
-        }
-
-    </style>
 {% endblock %}
 
 {% block content %}
     <div class="container-fluid clearfix" style="padding: 20px 0;">
-        <div class="col-sm-3">
+
+        <div class="col-sm-7">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-search" aria-hidden="true"></i> 筛选
-                </div>
-                <div class="panel-body filter-area">
+                <div class="panel-heading edit-heading">
+                    <div>
+                        <i class="fa fa-edit" aria-hidden="true"></i> 更新问题
+                    </div>
 
                 </div>
-            </div>
-        </div>
-
-        <div class="col-sm-9">
-            <div class="panel panel-default">
-                <!-- Default panel contents -->
-                <div class="panel-heading">问题</div>
                 <div class="panel-body">
-                    <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>
-                    <a class="btn btn-info btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>
-                </div>
-
-                <!-- Table -->
-                <table class="table">
-
-                    <tbody class="issues-list">
-                    {% for item in issues_object_list %}
-                        <tr>
-                            <td class="number">
-                                <i class="fa fa-circle text-{{ item.priority }}"></i>
-                                <a target="_blank"
-                                   href="{% url 'issues_detail' project_id=request.tracer.project.id issues_id=item.id %}"># {{ item.id }}
-                                </a>
-                            </td>
-                            <td class="issue">
-                                <div>
-                                    <a target="_blank"
-                                       href="{% url 'issues_detail' project_id=request.tracer.project.id issues_id=item.id %}">{{ item.subject }}  <!--这里-->
-                                    </a>
-                                </div>
-                                <div class="tags">
-                                    <span class="type">
-                                        {{ item.issues_type.title }}
-                                    </span>
-                                    <span>
-                                        <i class="fa fa-refresh" aria-hidden="true"></i>
-                                        {{ item.get_status_display }}
-                                    </span>
-                                    {% if item.assign %}
-                                        <span>
-                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>
-                                        {{ item.assign.username }}
-                                    </span>
-                                    {% endif %}
-
-                                    <span>
-                                        <i class="fa fa-user-o" aria-hidden="true"></i>
-                                        {{ item.creator.username }}
-                                    </span>
-                                    {% if item.end_date %}
-                                        <span><i class="fa fa-calendar"
-                                                 aria-hidden="true"></i> {{ item.end_date }} 截止</span>
-                                    {% endif %}
-                                    <span><i class="fa fa-clock-o"
-                                             aria-hidden="true"></i> {{ item.latest_update_datetime }} 更新</span>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="text-center" style="position: fixed"> <!--分页组件-->
-                <ul class="pagination">
-                    <!-- 首页链接-->
-                    {% if page_obj.has_previous %}
-                        <li>
-                            <a href="?page=1" aria-label="First">&laquo;</a>
-                        </li>
-                        <li>
-                            <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">&lsaquo;</a>
-                        </li>
-                    {% endif %}
-                    <li class="active">
-                        <span>当前第 {{ page_obj.number }} 页 总共 {{ page_obj.paginator.num_pages }} 页</span>
-                    </li>
-
-                    {% if page_obj.has_next %}
-                        <li>
-                            <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">&rsaquo;</a>
-                        </li>
-                        <li>
-                            <a href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">&raquo;</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-
-        </div>
-    </div>
-
-    <!--模态框-->
-    <div id="addModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">新建问题</h4>
-                </div>
-
-                <div class="modal-body" style="padding-right: 40px;"> <!--内容区-->
-                    <form class="form-horizontal" id="addForm">
+                    <form id="editForm" class="form-horizontal" method="post">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="{{ form.issues_type.id_for_label }}"
@@ -345,17 +172,79 @@
                                 </div>
                             </div>
                         </div>
+
+
                     </form>
                 </div>
+            </div>
+        </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
-                    <button type="button" class="btn btn-primary" id="btnAddSubmit">添 加</button>
+        <div class="col-sm-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-search" aria-hidden="true"></i> 操作记录
                 </div>
+                <div class="panel-body comment-area">
+
+                    <div class="comment-list">
+
+
+                    </div>
+
+                    <hr/>
+                    <div class="comment-text" id="commentText">
+
+                        <div class="form-group">
+                            <textarea id="content" rows="6" class="form-control"
+                                      placeholder="请输入要回复的内容"></textarea>
+                            <span class="error-msg"></span>
+                        </div>
+
+                        <input class="btn btn-primary" type="button" id="btnSubmit" value="提 交">
+                        <div class="reply-user hide" id="replyUser">
+                            回复 <span></span>
+                            <i class="fa fa-times-circle" aria-hidden="true" style="color: #9d9d9d;"></i>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="hide" id="recordTemplate">
+        <div class="item clearfix">
+            <div class="left-avatar"></div>
+            <div class="right-info">
+                <pre></pre>
+                <div class="desc">
+                    <div class="msg">
+                        <i class="fa fa-bullhorn" aria-hidden="true"></i>
+                        <span class="type"></span>
+                    </div>
+                    <div class="msg">
+                        <i class="fa fa-user-o" aria-hidden="true"></i>
+                        <span class="user"></span>
+                    </div>
+                    <div class="msg">
+                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                        <span class="date"></span>
+                    </div>
+
+                    <a href="#commentText" class="reply">
+                        <i class="fa fa-commenting-o" aria-hidden="true"></i> 回复
+                    </a>
+
+                </div>
+            </div>
+            <div class="child">
 
             </div>
         </div>
     </div>
+
 {% endblock %}
 
 {% block JS %}
@@ -365,13 +254,12 @@
     <script src="{% static  'plugins/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
     <script src="{% static  'plugins/bootstrap-select/js/bootstrap-select.min.js' %}"></script>
     <script src="{% static  'plugins/bootstrap-select/js/i18n/defaults-zh_CN.min.js' %}"></script>
+
     <script>
         var WIKI_UPLOAD_URL = "{% url 'wiki_upload' project_id=request.tracer.project.id %}";
-        var POST_ISSUES = "{% url 'issues' project_id=request.tracer.project.id %}";
         $(function () {
             initDatePicker()
-            bindBootStrapShownEvent();
-            bindAddSubmit()
+            initEditorMd()
         })
 
         //初始化时间选择
@@ -384,15 +272,6 @@
             });
         }
 
-        //弹出对话框时才触发markdown的渲染。避免兼容兼容的问题
-        function bindBootStrapShownEvent() {
-            $('#addModal').on('shown.bs.modal', function (event) {
-                // 对话框弹出时，内容触发。
-                initEditorMd();
-            })
-        }
-
-        //初始化markdown编辑器（textare转换为编辑器
         function initEditorMd() {
             editormd('editor', {
                 placeholder: "请输入内容",
@@ -401,31 +280,22 @@
                 imageUpload: true, //添加这个实现markdown本地上传文件
                 imageFormats: ["jpg", 'jpeg', 'png', 'gif'], //支持的上传格式
                 imageUploadURL: "{% url 'wiki_upload' project_id=request.tracer.project.id %}", //上传路径
+                toolbarAutoFixed: false, //限制编辑窗口的顶部固定
+                toolbarIcons: function () {  //这个可以限制markdown组件栏位的组件数量
+                    return ["bold", "hr", "del", "italic", "quote", "|", "image", "preview", "watch", "fullscreen", "||", "save"]
+                },
+                toolbarCustomIcons: { //甚至可以自定义组件栏里面的组件
+                    save: "<input type='button' value='保 存' class='btn btn-default btn-sm' onclick='saveDesc();' />"
+                },
+
+                onload: function () {  //让markd组件默认设置成预览状态
+                    this.previewing();
+                }
             })
         }
 
-        //表单数据上传给后台
-        function bindAddSubmit() {
-            $('#btnAddSubmit').click(function () {
-                $("#addForm").find('.error-msg').empty();
-                $.ajax({
-                    url: POST_ISSUES,
-                    type: "POST",
-                    data: $('#addForm').serialize(),
-                    dataType: "JSON",
-                    success: function (res) {
-                        if (res.status) {
-                            location.reload()
-                        } else {
-                            // 错误信息
-                            $.each(res.error, function (k, v) {
-                                $('#id_' + k).parent().next('.error-msg').text(v[0]);
-                            })
-                        }
-                    }
-                })
-            });
+        function saveDesc() {
+            alert("OvO")
         }
-
     </script>
 {% endblock %}

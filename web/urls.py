@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from web.views import account, home, project, manage,wiki,file,setting
+from web.views import account, home, project, manage,wiki,file,setting,issuse
 
 from app01 import views
 
@@ -26,7 +26,6 @@ urlpatterns = [
     # 项目管理
     path('manage/<int:project_id>/', include([
         path('dashboard/', manage.dashboard, name='dashboard'),
-        path('issues/', manage.issues, name='issues'),
         path('statistics/', manage.statistics, name='statistics'),
         # path('file/', manage.file, name='file'),
 
@@ -47,6 +46,10 @@ urlpatterns = [
 
         path('setting/', setting.setting, name='setting'),
         path('setting/delete/', setting.delete, name='setting_delete'),
+
+        # 以下为问题列表
+        path('issues/', issuse.issues, name='issues'),
+        path('issues/detail/<int:issues_id>/', issuse.issues_detail, name='issues_detail'),
     ], )),
 
 ]

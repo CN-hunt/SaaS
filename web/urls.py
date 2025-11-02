@@ -50,6 +50,7 @@ urlpatterns = [
         # 以下为问题列表
         path('issues/', issuse.issues, name='issues'),
         path('issues/detail/<int:issues_id>/', issuse.issues_detail, name='issues_detail'),
+        path('issues/issues_record/<int:issues_id>/', issuse.issues_record, name='issues_record'),
     ], )),
 
 ]

@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from web import models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 def issues(request, project_id):
@@ -37,7 +38,7 @@ def issues_detail(request, project_id, issues_id):
     return render(request, 'issues_detail.html', {'form': form, 'issues_object': issues_object})
 
 
-@ csrf_exempt
+@csrf_exempt
 def issues_record(request, project_id, issues_id):
     """ 初始化操作记录 """
 
@@ -76,3 +77,47 @@ def issues_record(request, project_id, issues_id):
 
         return JsonResponse({'status': True, 'data': info})
     return JsonResponse({'status': False, 'error': form.errors})
+
+
+@csrf_exempt
+def issues_change(request, project_id, issues_id):
+    issues_object = models.Issues.objects.filter(id=issues_id, project_id=project_id).first()
+
+    post_dict = json.loads(request.body.decode('utf-8'))
+
+    # 取到前端返回的值
+    name = post_dict.get('name')
+    value = post_dict.get('value')
+    field_object = models.Issues._meta.get_field(name)
+
+    # 1. 数据库字段更新
+    # 1.1 文本
+    if name in ["subject", 'desc', 'start_date', 'end_date']:
+
+        if not value:
+            if not field_object.null:
+                return JsonResponse({'status': False, 'error': "您选择的值不能为空"})
+            setattr(issues_object, name, None)
+            issues_object.save()
+            change_record = "{}更新为空".format(field_object.verbose_name)
+        else:
+            setattr(issues_object, name, value)
+            issues_object.save()
+            # 记录：xx更为了value
+            change_record = "{}更新为{}".format(field_object.verbose_name, value)
+
+        new_object = models.IssuesReply.objects.create(
+            reply_type=1,
+            issues=issues_object,
+            content=change_record,
+            creator=request.tracer.user,
+        )
+        new_reply_dict = {  # 数据返回前端
+            'id': new_object.id,
+            'reply_type_text': new_object.get_reply_type_display(),
+            'content': new_object.content,
+            'creator': new_object.creator.username,
+            'datetime': new_object.create_datetime.strftime("%Y-%m-%d %H:%M"),
+            'parent_id': new_object.reply_id
+        }
+        return JsonResponse({'status': True, 'data': new_reply_dict})

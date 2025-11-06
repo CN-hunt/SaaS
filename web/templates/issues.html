@@ -85,6 +85,16 @@
                     <i class="fa fa-search" aria-hidden="true"></i> 筛选
                 </div>
                 <div class="panel-body filter-area">
+                    {% for row in filter_list %}
+                        <div class="item">
+                            <div class="title">{{ row.title }}</div>
+                            <div class="check-list">
+                                {% for item in row.filter %}
+                                    {{ item }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
 
                 </div>
             </div>
@@ -114,7 +124,8 @@
                             <td class="issue">
                                 <div>
                                     <a target="_blank"
-                                       href="{% url 'issues_detail' project_id=request.tracer.project.id issues_id=item.id %}">{{ item.subject }}  <!--这里-->
+                                       href="{% url 'issues_detail' project_id=request.tracer.project.id issues_id=item.id %}">{{ item.subject }}
+                                        <!--这里-->
                                     </a>
                                 </div>
                                 <div class="tags">
@@ -372,6 +383,7 @@
             initDatePicker()
             bindBootStrapShownEvent();
             bindAddSubmit()
+            bindClickCheckFilter()
         })
 
         //初始化时间选择
@@ -424,6 +436,14 @@
                         }
                     }
                 })
+            });
+        }
+
+
+        //点击筛选的checkbox
+        function bindClickCheckFilter() {
+            $('.filter-area').find(':checkbox').click(function () {
+                location.href = $(this).parent().attr('href');
             });
         }
 

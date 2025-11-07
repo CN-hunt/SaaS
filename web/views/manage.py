@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
 
-def dashboard(request, project_id):
-    return render(request,'dashboard.html')
+# def dashboard(request, project_id):
+#     return render(request,'dashboard.html')
 
 
 def issues(request, project_id):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from web.views import account, home, project, manage,wiki,file,setting,issuse
+from web.views import account, home, project, manage,wiki,file,setting,issuse,dashboard
 
 from app01 import views
 
@@ -25,7 +25,6 @@ urlpatterns = [
 
     # 项目管理
     path('manage/<int:project_id>/', include([
-        path('dashboard/', manage.dashboard, name='dashboard'),
         path('statistics/', manage.statistics, name='statistics'),
         # path('file/', manage.file, name='file'),
 
@@ -52,6 +51,11 @@ urlpatterns = [
         path('issues/detail/<int:issues_id>/', issuse.issues_detail, name='issues_detail'),
         path('issues/issues_record/<int:issues_id>/', issuse.issues_record, name='issues_record'),
         path('issues/change/<int:issues_id>/', issuse.issues_change, name='issues_change'),
+        path('issues/invite/url/', issuse.invite_url, name='invite_url'),
+
+        # 以下为概览操作
+        path('dashboard/', dashboard.dashboard, name='dashboard'),
     ], )),
+    path('invite/join/<str:code>/',issuse.invite_join, name='invite_join'),
 
 ]

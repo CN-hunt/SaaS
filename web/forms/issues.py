@@ -59,3 +59,15 @@ class IssuesReplyModelForm(forms.ModelForm):
     class Meta:
         model = models.IssuesReply
         fields = ['content', 'reply']
+
+
+class InviteModelForm(forms.ModelForm):
+    """邀请码"""
+    class Meta:
+        model = models.ProjectInvite
+        fields = ['period', 'count']
+
+        widgets = {
+            'period': forms.Select(attrs={'class': 'form-control'}),
+            'count': forms.TextInput(attrs={'class': 'form-control'}),
+        }

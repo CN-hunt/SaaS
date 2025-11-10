@@ -1,5 +1,6 @@
 {% extends 'layout/manage.html' %}
 {% load dashboard %}
+{% load static %}
 
 {% block css %}
     <style>
@@ -72,6 +73,7 @@
                         新增问题趋势
                     </div>
                     <div class="panel-body">
+                        <div id="chart" style="width:100%;min-height:200px"></div>
                     </div>
                 </div>
 
@@ -104,8 +106,8 @@
                                 <div class="col-sm-12 title">创建者</div>
                                 <div class="clearfix" style="margin-bottom: 30px;">
                                     <div class="col-sm-4">
-                                        <div class="avatar">{{ request.tracer.project.creator.username.0|upper }}</div>
-                                        <div class="text">{{ request.tracer.project.creator.username }}</div>
+                                        <div class="avatar">{{ request.tracer.project.creator.username|upper }}</div>
+                                        {#                                        <div class="text">{{ request.tracer.project.creator.username }}</div>#}
                                     </div>
                                 </div>
                                 <div class="col-sm-12 title">参与者</div>
@@ -190,4 +192,82 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block JS %}
+    <script src="{% static 'plugins/highcharts/highcharts.js' %}"></script>
+    <script src="{% static 'JS/jquery-3.7.1.min.js' %}"></script>
+    <script>
+        var INIT_CHART = "{% url 'issues_chart' project_id=request.tracer.project.id %}";
+        Highcharts.setOptions({
+            global: {
+                useUTC: false
+            } //禁用utc时间
+        });
+
+        $(function () {
+            initChart();
+        });
+
+        function initChart() {
+            // chart
+            var config = {
+                title: {
+                    text: null   // 不显示标题
+                },
+                legend: {
+                    enabled: false // 关闭图例提示
+                },
+                credits: {
+                    enabled: false // 关闭版权信息
+                },
+                yAxis: {
+                    title: {
+                        text: '问题数量' // Y周文本提示
+                    }
+                },
+                xAxis: {
+                    type: 'datetime',
+                    tickInterval: 60 * 60 * 24 * 1000,
+                    labels: {
+                        formatter: function () {
+                            return Highcharts.dateFormat('%m-%d', this.value);
+                        },
+                        rotation: -30
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<b>{point.key}</b><br>',
+                    pointFormat: '<span style="color:{series.color}">\u25CF</span> 数量: {point.y} ',
+                    xDateFormat: '%Y-%m-%d',
+                },
+                plotOptions: {
+                    area: {
+                        stacking: 'normal',
+                        lineColor: '#666666',
+                        lineWidth: 1,
+                        marker: {
+                            lineWidth: 1,
+                            lineColor: '#666666'
+                        }
+                    }
+                },
+                series: [{
+                    data: []
+                }]
+            };
+            $.ajax({
+                url: INIT_CHART,
+                type: "GET",
+                dataType: "JSON",
+                success: function (res) {
+                    config.series[0].data = res.data;
+                    var chart = Highcharts.chart('chart', config);
+                }
+            });
+
+
+        }
+
+    </script>
 {% endblock %}

@@ -105,12 +105,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
+# 这个影响生产数据库生成的时间字段
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)

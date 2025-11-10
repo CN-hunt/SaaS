@@ -331,39 +331,39 @@ def invite_join(request, code):
         # max_member = request.tracer.price_policy.project_member # 当前登录用户他限制
 
         # 是否已过期，如果已过期则使用免费额度
-        max_transaction = models.Transaction.objects.filter(user=invite_object.project.creator).order_by('-id').first()
-        if max_transaction.price_policy.category == 1:
-            max_member = max_transaction.price_policy.project_member
+    max_transaction = models.Transaction.objects.filter(user=invite_object.project.creator).order_by('-id').first()
+    if max_transaction.price_policy.category == 1:
+        max_member = max_transaction.price_policy.project_member
+    else:
+        if max_transaction.end_datetime < current_datetime:
+            free_object = models.PricePolicy.objects.filter(category=1).first()
+            max_member = free_object.project_member
         else:
-            if max_transaction.end_datetime < current_datetime:
-                free_object = models.PricePolicy.objects.filter(category=1).first()
-                max_member = free_object.project_member
-            else:
-                max_member = max_transaction.price_policy.project_member
+            max_member = max_transaction.price_policy.project_member
 
-        # 目前所有成员(创建者&参与者）
-        current_member = models.ProjectUser.objects.filter(project=invite_object.project).count()
-        current_member = current_member + 1
-        if current_member >= max_member:
-            return render(request, 'invite_join.html', {'error': '项目成员超限，请升级套餐'})
+    # 目前所有成员(创建者&参与者）
+    current_member = models.ProjectUser.objects.filter(project=invite_object.project).count()
+    current_member = current_member + 1
+    if current_member >= max_member:
+        return render(request, 'invite_join.html', {'error': '项目成员超限，请升级套餐'})
 
-        # 邀请码是否过期？
+    # 邀请码是否过期？
 
-        limit_datetime = invite_object.create_datetime + datetime.timedelta(minutes=invite_object.period)
-        if current_datetime > limit_datetime:
-            return render(request, 'invite_join.html', {'error': '邀请码已过期'})
+    limit_datetime = invite_object.create_datetime + datetime.timedelta(minutes=invite_object.period)
+    if current_datetime > limit_datetime:
+        return render(request, 'invite_join.html', {'error': '邀请码已过期'})
 
-        # 数量限制？
-        if invite_object.count:
-            if invite_object.use_count >= invite_object.count:
-                return render(request, 'invite_join.html', {'error': '邀请码数据已使用完'})
-            invite_object.use_count += 1
-            invite_object.save()
+    # 数量限制？
+    if invite_object.count:
+        if invite_object.use_count >= invite_object.count:
+            return render(request, 'invite_join.html', {'error': '邀请码数据已使用完'})
+        invite_object.use_count += 1
+        invite_object.save()
 
-        models.ProjectUser.objects.create(user=request.tracer.user, project=invite_object.project)
+    models.ProjectUser.objects.create(user=request.tracer.user, project=invite_object.project)
 
-        # ####### 问题2： 更新项目参与成员 #######
-        invite_object.project.join_count += 1
-        invite_object.project.save()
+    # ####### 问题2： 更新项目参与成员 #######
+    invite_object.project.join_count += 1
+    invite_object.project.save()
 
-        return render(request, 'invite_join.html', {'project': invite_object.project})
+    return render(request, 'invite_join.html', {'project': invite_object.project})

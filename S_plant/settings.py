@@ -134,6 +134,9 @@ WHITE_REGEX_URL_LIST = [
     '/image/code/',
     # 主页
     '/index/',
+
+    # 充值
+    '/prices/',
 ]
 
 

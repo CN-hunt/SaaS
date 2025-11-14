@@ -40,7 +40,7 @@ def statistics_project_user(request, project_id):
     """
     info = {
         1:{
-            name:"武沛齐",
+            name:"贵船柚子",
             status:{
                 1:0,
                 2:1,
@@ -52,7 +52,7 @@ def statistics_project_user(request, project_id):
             }
         },
         2:{
-            name:"王洋",
+            name:"飞鸟凑",
             status:{
                 1:0,
                 2:0,

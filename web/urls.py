@@ -17,6 +17,12 @@ urlpatterns = [
     # 主页
     path('index/', home.index, name='index'),
 
+    # 充值界面
+    path('prices/',home.prices,name='prices'),
+    path('payment/<int:policy_id>/',home.payment,name='payment'),
+    path('pay/',home.pay,name='pay'),
+    path('pay/notify/',home.pay_notify,name='pay_notify'),
+
     # 项目列表
     path('project/list/', project.project_list, name='project_list'),
 
@@ -61,7 +67,10 @@ urlpatterns = [
         path('statistics/statistics_priority', statistics.statistics_priority, name='statistics_priority'),
         path('statistics/statistics_project_user', statistics.statistics_project_user, name='statistics_project_user'),
 
+
+
     ], )),
     path('invite/join/<str:code>/',issuse.invite_join, name='invite_join'),
+
 
 ]

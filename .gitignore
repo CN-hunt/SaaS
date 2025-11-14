@@ -4,6 +4,8 @@
 
 local_settings.py
 
+files/
+
 # Python
 __pycache__/
 *.py[cod]
